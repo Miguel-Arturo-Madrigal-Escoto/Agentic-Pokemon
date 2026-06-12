@@ -8,7 +8,7 @@ const BASE = 'https://pokeapi.co/api/v2';
  * The API expects lowercase names (`pikachu`, not `Pikachu`).
  */
 export async function fetchPokemon(query) {
-  const res = await fetch(`${BASE}/pokemon/${query}`);
+  const res = await fetch(`${BASE}/pokemon/${query.toLowerCase()}`);
   if (!res.ok) return null;
   return res.json();
 }

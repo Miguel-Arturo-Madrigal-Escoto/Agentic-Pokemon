@@ -22,6 +22,7 @@ export default function App() {
     setLoading(true);
     fetchPokemonList(24).then((data) => {
       setPokemon(data);
+      setLoading(false);
     });
   }, []);
 
@@ -39,12 +40,16 @@ export default function App() {
   // Filter the grid by selected type.
   const filtered = pokemon.filter((p) => {
     if (typeFilter === 'All') return true;
-    return p.types.some((t) => t.type.name === typeFilter);
+    return p.types.some((t) => t.type.name.toLowerCase() === typeFilter.toLowerCase());
   });
 
   // Toggle: add a Pokémon to favorites, or remove it if it's already there.
   function toggleFavorite(p) {
-    setFavorites([...favorites, p]);
+    setFavorites((prev) =>
+      prev.some((f) => f.name === p.name)
+        ? prev.filter((f) => f.name !== p.name)
+        : [...prev, p]
+    );
   }
 
   return (
