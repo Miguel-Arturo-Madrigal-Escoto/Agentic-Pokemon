@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchPokemon, fetchPokemonList } from './api.js';
+import { fetchPokemon, fetchPokemonList, parseSearchQuery } from './api.js';
 import SearchBar from './components/SearchBar.jsx';
 import TypeFilter from './components/TypeFilter.jsx';
 import PokemonCard from './components/PokemonCard.jsx';
@@ -22,29 +22,41 @@ export default function App() {
     setLoading(true);
     fetchPokemonList(24).then((data) => {
       setPokemon(data);
+      setLoading(false);
     });
   }, []);
 
   // Search effect — looks up a single Pokémon as the user types.
   useEffect(() => {
-    if (!search) {
+    const query = parseSearchQuery(search);
+    if (!query) {
       setSearchResult(null);
       return;
     }
-    fetchPokemon(search).then((data) => {
-      setSearchResult(data);
+
+    let cancelled = false;
+    fetchPokemon(query).then((data) => {
+      if (!cancelled) setSearchResult(data);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [search]);
 
   // Filter the grid by selected type.
   const filtered = pokemon.filter((p) => {
     if (typeFilter === 'All') return true;
-    return p.types.some((t) => t.type.name === typeFilter);
+    return p.types.some((t) => t.type.name === typeFilter.toLowerCase());
   });
 
   // Toggle: add a Pokémon to favorites, or remove it if it's already there.
   function toggleFavorite(p) {
-    setFavorites([...favorites, p]);
+    setFavorites((prev) =>
+      prev.some((f) => f.name === p.name)
+        ? prev.filter((f) => f.name !== p.name)
+        : [...prev, p]
+    );
   }
 
   return (
@@ -70,7 +82,7 @@ export default function App() {
         </section>
       )}
 
-      {searchResult && (
+      {searchResult?.id != null && (
         <section className="search-result">
           <h3>Search result</h3>
           <div className="grid">

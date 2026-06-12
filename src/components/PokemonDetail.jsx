@@ -4,7 +4,7 @@ export default function PokemonDetail({ p, onClose }) {
   if (!p) return null;
 
   return (
-    <div className="modal-backdrop">
+    <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal"
         role="dialog"
